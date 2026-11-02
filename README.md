@@ -11,6 +11,14 @@ This project uses a custom C# three-layer multi-layer perceptron (input, hidden,
 5. Choose the learning rate, hidden-node count, and epoch count, then select **Train model**.
 6. Select **Run tuning** to compare the fixed-seed configurations used for the experiment table.
 
+**Important:** If `Solution 'MlpProject'` shows `(0 projects)` or the Start button displays **Attach**:
+
+1. Right-click `Solution 'MlpProject'`.
+2. Select **Add > Existing Project**.
+3. Select `MlpProject > MlpProject > MlpProject.csproj`.
+4. Right-click the added `MlpProject` project and select **Set as Startup Project**.
+5. Click the Start button to run the application.
+
 The form uses an 80/20 stratified split with seed `42`. Features are fitted and MinMax-scaled using the training split, then the same scaler is applied to the test split. The target labels are encoded as `B = 0` and `M = 1`.
 
 ## Architecture
