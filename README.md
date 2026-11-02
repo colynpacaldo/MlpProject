@@ -49,10 +49,10 @@ Every run automatically saves its evidence to the `results/` folder next to `Mlp
 
 ## Visualization
 
-The lower half of the window plots training loss against epoch (one line per configuration during tuning). Add a screenshot after you run it:
+The lower half of the window plots training loss against epoch (one line per configuration during tuning):
 
 ```
-![Loss curves](MlpProject/results/loss_curves.png)
+<img width="805" height="391" alt="loss_curves" src="https://github.com/user-attachments/assets/a86d0e15-8467-4e72-bbe0-3188ca66a7ea" />
 ```
 
 ## Hyperparameter Tuning Results
