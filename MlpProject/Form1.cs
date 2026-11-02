@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -35,7 +37,15 @@ namespace MlpProject
                 AppendOutput(string.Empty);
                 AppendOutput("TRAINING COMPLETE");
                 AppendOutput(ExperimentRunner.FormatResult(result));
+                AppendOutput(string.Empty);
+                AppendOutput("Test-set metrics:");
                 AppendOutput(result.Training.TestMetrics.ToString());
+                AppendOutput(string.Empty);
+                AppendOutput(ExperimentRunner.FormatConfusionMatrix(result.Training.TestMetrics));
+
+                var results = new List<ExperimentResult> { result };
+                ShowLossChart(results);
+                SaveResults(results, "train");
             }
             catch (Exception exception)
             {
@@ -64,22 +74,32 @@ namespace MlpProject
                         AppendOutput);
                 });
 
-                ExperimentResult best = null;
+                AppendOutput(string.Empty);
+                AppendOutput("TUNING SUMMARY (test split)");
                 foreach (ExperimentResult result in results)
                 {
                     AppendOutput(ExperimentRunner.FormatResult(result));
-                    if (best == null || result.Training.TestMetrics.Accuracy > best.Training.TestMetrics.Accuracy)
-                    {
-                        best = result;
-                    }
                 }
 
+                AppendOutput(string.Empty);
+                AppendOutput("README TABLE ROWS (paste into the tuning table, then write the Observations):");
+                foreach (ExperimentResult result in results)
+                {
+                    AppendOutput(ExperimentRunner.FormatMarkdownRow(result));
+                }
+
+                ExperimentResult best = ExperimentRunner.SelectBest(results);
                 if (best != null)
                 {
                     AppendOutput(string.Empty);
-                    AppendOutput("BEST CONFIGURATION BY TEST ACCURACY");
+                    AppendOutput("BEST CONFIGURATION (highest test accuracy; ties -> higher recall, then lower loss)");
                     AppendOutput(ExperimentRunner.FormatResult(best));
+                    AppendOutput(ExperimentRunner.FormatConfusionMatrix(best.Training.TestMetrics));
+                    AppendOutput("Note: choosing by test accuracy slightly favors this split; confirm with TrainAcc vs TestAcc.");
                 }
+
+                ShowLossChart(results);
+                SaveResults(results, "tuning");
             }
             catch (Exception exception)
             {
@@ -88,6 +108,19 @@ namespace MlpProject
             finally
             {
                 SetBusy(false);
+            }
+        }
+
+        private void btnOpenResults_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string directory = ResultsExporter.ResolveOutputDirectory();
+                Process.Start("explorer.exe", "\"" + directory + "\"");
+            }
+            catch (Exception exception)
+            {
+                ShowError(exception);
             }
         }
 
@@ -100,6 +133,29 @@ namespace MlpProject
                 EpochCount = (int)nudEpochs.Value,
                 RandomSeed = 42
             };
+        }
+
+        /// <summary>Plots the per-epoch loss of every supplied experiment.</summary>
+        private void ShowLossChart(IEnumerable<ExperimentResult> results)
+        {
+            lossChart.SetSeries(results.Select(
+                r => new LossSeries(r.Configuration.ToString(), r.Training.LossHistory)));
+        }
+
+        /// <summary>Writes the CSV/text logs to the project's results folder and reports where they went.</summary>
+        private void SaveResults(IList<ExperimentResult> results, string prefix)
+        {
+            try
+            {
+                string directory = ResultsExporter.Save(results, txtOutput.Text, prefix);
+                AppendOutput(string.Empty);
+                AppendOutput("Saved " + prefix + "_loss_history.csv, " + prefix + "_summary.csv and "
+                             + prefix + "_console_log.txt to: " + directory);
+            }
+            catch (Exception exception)
+            {
+                AppendOutput("Could not save result files: " + exception.Message);
+            }
         }
 
         private void AppendOutput(string message)
@@ -127,15 +183,6 @@ namespace MlpProject
         {
             AppendOutput("ERROR: " + exception.Message);
             MessageBox.Show(this, exception.ToString(), "MLP Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-
-        private void btnEvaluate_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show(
-                "Evaluation is ready. Connect your custom MLP's predictions here in the training-loop step.",
-                "Network required",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
         }
     }
 }

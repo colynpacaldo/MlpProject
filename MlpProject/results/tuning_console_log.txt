@@ -1,0 +1,69 @@
+Running fixed-seed hyperparameter experiments...
+[LR=0.001, Hidden=10, Epochs=500] Epoch 1/500 - Loss: 0.709195
+[LR=0.001, Hidden=10, Epochs=500] Epoch 100/500 - Loss: 0.356718
+[LR=0.001, Hidden=10, Epochs=500] Epoch 200/500 - Loss: 0.201267
+[LR=0.001, Hidden=10, Epochs=500] Epoch 300/500 - Loss: 0.152472
+[LR=0.001, Hidden=10, Epochs=500] Epoch 400/500 - Loss: 0.129106
+[LR=0.001, Hidden=10, Epochs=500] Epoch 500/500 - Loss: 0.114881
+[LR=0.005, Hidden=10, Epochs=500] Epoch 1/500 - Loss: 0.685429
+[LR=0.005, Hidden=10, Epochs=500] Epoch 100/500 - Loss: 0.115780
+[LR=0.005, Hidden=10, Epochs=500] Epoch 200/500 - Loss: 0.085661
+[LR=0.005, Hidden=10, Epochs=500] Epoch 300/500 - Loss: 0.074472
+[LR=0.005, Hidden=10, Epochs=500] Epoch 400/500 - Loss: 0.067870
+[LR=0.005, Hidden=10, Epochs=500] Epoch 500/500 - Loss: 0.063249
+[LR=0.01, Hidden=10, Epochs=500] Epoch 1/500 - Loss: 0.673500
+[LR=0.01, Hidden=10, Epochs=500] Epoch 100/500 - Loss: 0.086418
+[LR=0.01, Hidden=10, Epochs=500] Epoch 200/500 - Loss: 0.068715
+[LR=0.01, Hidden=10, Epochs=500] Epoch 300/500 - Loss: 0.060707
+[LR=0.01, Hidden=10, Epochs=500] Epoch 400/500 - Loss: 0.055999
+[LR=0.01, Hidden=10, Epochs=500] Epoch 500/500 - Loss: 0.052948
+[LR=0.05, Hidden=10, Epochs=500] Epoch 1/500 - Loss: 0.615919
+[LR=0.05, Hidden=10, Epochs=500] Epoch 100/500 - Loss: 0.059923
+[LR=0.05, Hidden=10, Epochs=500] Epoch 200/500 - Loss: 0.052752
+[LR=0.05, Hidden=10, Epochs=500] Epoch 300/500 - Loss: 0.046555
+[LR=0.05, Hidden=10, Epochs=500] Epoch 400/500 - Loss: 0.039154
+[LR=0.05, Hidden=10, Epochs=500] Epoch 500/500 - Loss: 0.030798
+[LR=0.01, Hidden=5, Epochs=500] Epoch 1/500 - Loss: 0.653160
+[LR=0.01, Hidden=5, Epochs=500] Epoch 100/500 - Loss: 0.087282
+[LR=0.01, Hidden=5, Epochs=500] Epoch 200/500 - Loss: 0.068734
+[LR=0.01, Hidden=5, Epochs=500] Epoch 300/500 - Loss: 0.060527
+[LR=0.01, Hidden=5, Epochs=500] Epoch 400/500 - Loss: 0.055809
+[LR=0.01, Hidden=5, Epochs=500] Epoch 500/500 - Loss: 0.052783
+[LR=0.01, Hidden=20, Epochs=500] Epoch 1/500 - Loss: 0.653200
+[LR=0.01, Hidden=20, Epochs=500] Epoch 100/500 - Loss: 0.088826
+[LR=0.01, Hidden=20, Epochs=500] Epoch 200/500 - Loss: 0.070665
+[LR=0.01, Hidden=20, Epochs=500] Epoch 300/500 - Loss: 0.062204
+[LR=0.01, Hidden=20, Epochs=500] Epoch 400/500 - Loss: 0.057211
+[LR=0.01, Hidden=20, Epochs=500] Epoch 500/500 - Loss: 0.054003
+[LR=0.01, Hidden=30, Epochs=500] Epoch 1/500 - Loss: 0.662945
+[LR=0.01, Hidden=30, Epochs=500] Epoch 100/500 - Loss: 0.087522
+[LR=0.01, Hidden=30, Epochs=500] Epoch 200/500 - Loss: 0.069940
+[LR=0.01, Hidden=30, Epochs=500] Epoch 300/500 - Loss: 0.061816
+[LR=0.01, Hidden=30, Epochs=500] Epoch 400/500 - Loss: 0.056973
+[LR=0.01, Hidden=30, Epochs=500] Epoch 500/500 - Loss: 0.053803
+
+TUNING SUMMARY (test split)
+LR=0.001, Hidden=10, Epochs=500 | Loss=0.114881 | TrainAcc=97.81% | TestAcc=96.46% | Precision=95.24% | Recall=95.24%
+LR=0.005, Hidden=10, Epochs=500 | Loss=0.063249 | TrainAcc=98.25% | TestAcc=97.35% | Precision=97.56% | Recall=95.24%
+LR=0.01, Hidden=10, Epochs=500 | Loss=0.052948 | TrainAcc=98.46% | TestAcc=96.46% | Precision=95.24% | Recall=95.24%
+LR=0.05, Hidden=10, Epochs=500 | Loss=0.030798 | TrainAcc=98.90% | TestAcc=97.35% | Precision=97.56% | Recall=95.24%
+LR=0.01, Hidden=5, Epochs=500 | Loss=0.052783 | TrainAcc=98.25% | TestAcc=96.46% | Precision=95.24% | Recall=95.24%
+LR=0.01, Hidden=20, Epochs=500 | Loss=0.054003 | TrainAcc=98.25% | TestAcc=96.46% | Precision=95.24% | Recall=95.24%
+LR=0.01, Hidden=30, Epochs=500 | Loss=0.053803 | TrainAcc=98.25% | TestAcc=96.46% | Precision=95.24% | Recall=95.24%
+
+README TABLE ROWS (paste into the tuning table, then write the Observations):
+| 0.001 | 10 | 500 | 0.114881 | 96.46% |  |
+| 0.005 | 10 | 500 | 0.063249 | 97.35% |  |
+| 0.010 | 10 | 500 | 0.052948 | 96.46% |  |
+| 0.050 | 10 | 500 | 0.030798 | 97.35% |  |
+| 0.010 | 5 | 500 | 0.052783 | 96.46% |  |
+| 0.010 | 20 | 500 | 0.054003 | 96.46% |  |
+| 0.010 | 30 | 500 | 0.053803 | 96.46% |  |
+
+BEST CONFIGURATION (highest test accuracy; ties -> higher recall, then lower loss)
+LR=0.05, Hidden=10, Epochs=500 | Loss=0.030798 | TrainAcc=98.90% | TestAcc=97.35% | Precision=97.56% | Recall=95.24%
+Confusion matrix (rows = actual, columns = predicted):
+              Pred B  Pred M
+Actual B         70       1
+Actual M          2      40
+Note: choosing by test accuracy slightly favors this split; confirm with TrainAcc vs TestAcc.

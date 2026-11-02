@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace MlpProject
@@ -26,7 +27,7 @@ namespace MlpProject
         }
     }
 
-    /// <summary>Contains one configuration and its measured test-set result.</summary>
+    /// <summary>Contains one configuration and its measured result.</summary>
     public sealed class ExperimentResult
     {
         /// <summary>Gets the configuration that produced this result.</summary>
@@ -39,8 +40,11 @@ namespace MlpProject
     /// <summary>Runs the custom MLP and repeatable hyperparameter experiments.</summary>
     public static class ExperimentRunner
     {
+        /// <summary>Maximum number of epochs between console/log progress lines.</summary>
+        private const int MaxLogInterval = 100;
+
         /// <summary>
-        /// Prepares the included CSV and runs one MLP configuration.
+        /// Trains and evaluates one MLP configuration on already prepared data.
         /// </summary>
         /// <param name="data">Prepared train/test data.</param>
         /// <param name="configuration">Network and training settings.</param>
@@ -60,12 +64,15 @@ namespace MlpProject
                 configuration.LearningRate,
                 configuration.RandomSeed);
 
+            // Log the loss every 100 epochs (or fewer for short runs), as the activity requires.
+            int logInterval = Math.Max(1, Math.Min(MaxLogInterval, configuration.EpochCount));
+
             var training = TrainingLoop.Run(
                 data,
                 network.TrainSample,
                 network.Predict,
                 configuration.EpochCount,
-                Math.Max(1, configuration.EpochCount / 10),
+                logInterval,
                 log);
 
             return new ExperimentResult
@@ -91,12 +98,13 @@ namespace MlpProject
             var results = new List<ExperimentResult>();
             foreach (TrainingConfiguration configuration in configurations)
             {
+                TrainingConfiguration current = configuration;
                 Action<string> experimentLog = message =>
                 {
-                    if (log != null) log($"[{configuration}] {message}");
+                    if (log != null) log($"[{current}] {message}");
                 };
 
-                results.Add(Run(data, configuration, experimentLog));
+                results.Add(Run(data, current, experimentLog));
             }
 
             return results;
@@ -119,12 +127,64 @@ namespace MlpProject
             };
         }
 
+        /// <summary>
+        /// Picks the best result: highest test accuracy, ties broken by higher recall
+        /// (missing a malignant case is the costliest error), then by lower final loss.
+        /// </summary>
+        /// <returns>The best result, or null when the sequence is empty.</returns>
+        public static ExperimentResult SelectBest(IEnumerable<ExperimentResult> results)
+        {
+            if (results == null) throw new ArgumentNullException(nameof(results));
+
+            return results
+                .OrderByDescending(r => r.Training.TestMetrics.Accuracy)
+                .ThenByDescending(r => r.Training.TestMetrics.Recall)
+                .ThenBy(r => r.Training.FinalTrainingLoss)
+                .FirstOrDefault();
+        }
+
         /// <summary>Formats a result for the UI and README experiment notes.</summary>
         public static string FormatResult(ExperimentResult result)
         {
-            ClassificationMetrics metrics = result.Training.TestMetrics;
+            ClassificationMetrics test = result.Training.TestMetrics;
+            ClassificationMetrics train = result.Training.TrainMetrics;
             return $"{result.Configuration} | Loss={result.Training.FinalTrainingLoss:F6} | " +
-                   $"Accuracy={metrics.Accuracy:P2} | Precision={metrics.Precision:P2} | Recall={metrics.Recall:P2}";
+                   $"TrainAcc={train.Accuracy:P2} | TestAcc={test.Accuracy:P2} | " +
+                   $"Precision={test.Precision:P2} | Recall={test.Recall:P2}";
+        }
+
+        /// <summary>
+        /// Formats one README tuning-table row (the Observations column is left blank on purpose).
+        /// </summary>
+        public static string FormatMarkdownRow(ExperimentResult result)
+        {
+            TrainingConfiguration c = result.Configuration;
+            double accuracyPercent = result.Training.TestMetrics.Accuracy * 100.0;
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "| {0:0.000} | {1} | {2} | {3:F6} | {4:F2}% |  |",
+                c.LearningRate,
+                c.HiddenNodeCount,
+                c.EpochCount,
+                result.Training.FinalTrainingLoss,
+                accuracyPercent);
+        }
+
+        /// <summary>
+        /// Formats a binary confusion matrix (rows = actual, columns = predicted) as text.
+        /// Class 0 = B (benign), class 1 = M (malignant).
+        /// </summary>
+        public static string FormatConfusionMatrix(ClassificationMetrics metrics)
+        {
+            if (metrics == null) throw new ArgumentNullException(nameof(metrics));
+            if (!metrics.IsBinary) return string.Empty;
+
+            ConfusionMatrix m = metrics.Matrix;
+            string nl = Environment.NewLine;
+            return "Confusion matrix (rows = actual, columns = predicted):" + nl +
+                   "              Pred B  Pred M" + nl +
+                   $"Actual B   {m.GetCount(0, 0),8}{m.GetCount(0, 1),8}" + nl +
+                   $"Actual M   {m.GetCount(1, 0),8}{m.GetCount(1, 1),8}";
         }
     }
 }

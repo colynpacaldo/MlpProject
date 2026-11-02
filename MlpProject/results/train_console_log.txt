@@ -1,0 +1,26 @@
+Preparing the Wisconsin Diagnostic Breast Cancer dataset...
+Epoch 1/1000 - Loss: 0.673500
+Epoch 100/1000 - Loss: 0.086418
+Epoch 200/1000 - Loss: 0.068715
+Epoch 300/1000 - Loss: 0.060707
+Epoch 400/1000 - Loss: 0.055999
+Epoch 500/1000 - Loss: 0.052948
+Epoch 600/1000 - Loss: 0.050776
+Epoch 700/1000 - Loss: 0.049093
+Epoch 800/1000 - Loss: 0.047693
+Epoch 900/1000 - Loss: 0.046466
+Epoch 1000/1000 - Loss: 0.045341
+
+TRAINING COMPLETE
+LR=0.01, Hidden=10, Epochs=1000 | Loss=0.045341 | TrainAcc=98.46% | TestAcc=97.35% | Precision=97.56% | Recall=95.24%
+
+Test-set metrics:
+Samples:   113
+Accuracy:  97.35%
+Precision: 97.56% (positive class)
+Recall:    95.24% (positive class)
+
+Confusion matrix (rows = actual, columns = predicted):
+              Pred B  Pred M
+Actual B         70       1
+Actual M          2      40

@@ -1,15 +1,21 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace MlpProject
 {
     /// <summary>
-    /// Contains the result produced after training and test-set evaluation.
+    /// Contains the result produced after training and evaluation.
     /// </summary>
     public sealed class TrainingResult
     {
         /// <summary>Gets the final average training loss.</summary>
         public double FinalTrainingLoss { get; internal set; }
+
+        /// <summary>Gets the average training loss recorded after every epoch (index 0 = epoch 1).</summary>
+        public IReadOnlyList<double> LossHistory { get; internal set; } = new double[0];
+
+        /// <summary>Gets the metrics calculated from the training set (used to spot overfitting).</summary>
+        public ClassificationMetrics TrainMetrics { get; internal set; }
 
         /// <summary>Gets the metrics calculated from the test set.</summary>
         public ClassificationMetrics TestMetrics { get; internal set; }
@@ -21,7 +27,7 @@ namespace MlpProject
     public static class TrainingLoop
     {
         /// <summary>
-        /// Trains a network and evaluates it on the test split.
+        /// Trains a network and evaluates it on the training and test splits.
         /// </summary>
         /// <param name="data">Preprocessed training and test data.</param>
         /// <param name="trainSample">
@@ -35,7 +41,7 @@ namespace MlpProject
         /// <param name="epochCount">Number of complete passes through the training data.</param>
         /// <param name="logInterval">Number of epochs between progress messages.</param>
         /// <param name="log">Optional progress logger; defaults to <see cref="Console.WriteLine(string)"/>.</param>
-        /// <returns>The final loss and test-set metrics.</returns>
+        /// <returns>The loss history, final loss, and train/test metrics.</returns>
         public static TrainingResult Run(
             PreparedDataset data,
             Func<double[], double[], double> trainSample,
@@ -72,6 +78,7 @@ namespace MlpProject
 
             Action<string> writeLog = log ?? Console.WriteLine;
             double finalLoss = 0.0;
+            var lossHistory = new List<double>(epochCount);
 
             for (int epoch = 1; epoch <= epochCount; epoch++)
             {
@@ -93,6 +100,7 @@ namespace MlpProject
                 }
 
                 finalLoss = totalLoss / data.TrainFeatures.Length;
+                lossHistory.Add(finalLoss);
 
                 if (epoch % logInterval == 0 || epoch == 1 || epoch == epochCount)
                 {
@@ -100,93 +108,25 @@ namespace MlpProject
                 }
             }
 
-            var outputs = new List<double[]>(data.TestFeatures.Length);
-            for (int sampleIndex = 0; sampleIndex < data.TestFeatures.Length; sampleIndex++)
-            {
-                outputs.Add(predict(data.TestFeatures[sampleIndex]));
-            }
-
             return new TrainingResult
             {
                 FinalTrainingLoss = finalLoss,
-                TestMetrics = Evaluator.Evaluate(data.TestTargets, outputs)
+                LossHistory = lossHistory,
+                TrainMetrics = Evaluator.Evaluate(data.TrainTargets, PredictAll(data.TrainFeatures, predict)),
+                TestMetrics = Evaluator.Evaluate(data.TestTargets, PredictAll(data.TestFeatures, predict))
             };
         }
-    }
 
-    /// <summary>Defines one reproducible training configuration.</summary>
-    public sealed class TrainingConfiguration
-    {
-        public double LearningRate { get; set; }
-        public int HiddenNodeCount { get; set; }
-        public int EpochCount { get; set; }
-        public int RandomSeed { get; set; } = 42;
-
-        public override string ToString()
+        /// <summary>Runs the network on every feature vector and collects the outputs in order.</summary>
+        private static List<double[]> PredictAll(double[][] features, Func<double[], double[]> predict)
         {
-            return $"LR={LearningRate:0.###}, Hidden={HiddenNodeCount}, Epochs={EpochCount}";
-        }
-    }
-
-    /// <summary>Contains one configuration and its measured test-set result.</summary>
-    public sealed class ExperimentResult
-    {
-        public TrainingConfiguration Configuration { get; internal set; }
-        public TrainingResult Training { get; internal set; }
-    }
-
-    /// <summary>Runs the custom MLP and repeatable hyperparameter experiments.</summary>
-    public static class ExperimentRunner
-    {
-        public static ExperimentResult Run(PreparedDataset data, TrainingConfiguration configuration, Action<string> log = null)
-        {
-            if (data == null) throw new ArgumentNullException(nameof(data));
-            if (configuration == null) throw new ArgumentNullException(nameof(configuration));
-
-            var network = new MlpNetwork(data.FeatureCount, configuration.HiddenNodeCount,
-                data.TrainTargets[0].Length, configuration.LearningRate, configuration.RandomSeed);
-            var training = TrainingLoop.Run(data, network.TrainSample, network.Predict,
-                configuration.EpochCount, Math.Max(1, configuration.EpochCount / 10), log);
-
-            return new ExperimentResult { Configuration = configuration, Training = training };
-        }
-
-        public static IList<ExperimentResult> RunTuning(
-            PreparedDataset data, IEnumerable<TrainingConfiguration> configurations, Action<string> log = null)
-        {
-            if (configurations == null) throw new ArgumentNullException(nameof(configurations));
-
-            var results = new List<ExperimentResult>();
-            foreach (TrainingConfiguration configuration in configurations)
+            var outputs = new List<double[]>(features.Length);
+            for (int sampleIndex = 0; sampleIndex < features.Length; sampleIndex++)
             {
-                Action<string> experimentLog = message =>
-                {
-                    if (log != null) log($"[{configuration}] {message}");
-                };
-                results.Add(Run(data, configuration, experimentLog));
+                outputs.Add(predict(features[sampleIndex]));
             }
-            return results;
-        }
 
-        public static IList<TrainingConfiguration> CreateDefaultTuningConfigurations()
-        {
-            return new List<TrainingConfiguration>
-            {
-                new TrainingConfiguration { LearningRate = 0.001, HiddenNodeCount = 10, EpochCount = 500 },
-                new TrainingConfiguration { LearningRate = 0.005, HiddenNodeCount = 10, EpochCount = 500 },
-                new TrainingConfiguration { LearningRate = 0.010, HiddenNodeCount = 10, EpochCount = 500 },
-                new TrainingConfiguration { LearningRate = 0.050, HiddenNodeCount = 10, EpochCount = 500 },
-                new TrainingConfiguration { LearningRate = 0.010, HiddenNodeCount = 5, EpochCount = 500 },
-                new TrainingConfiguration { LearningRate = 0.010, HiddenNodeCount = 20, EpochCount = 500 },
-                new TrainingConfiguration { LearningRate = 0.010, HiddenNodeCount = 30, EpochCount = 500 }
-            };
-        }
-
-        public static string FormatResult(ExperimentResult result)
-        {
-            ClassificationMetrics metrics = result.Training.TestMetrics;
-            return $"{result.Configuration} | Loss={result.Training.FinalTrainingLoss:F6} | " +
-                   $"Accuracy={metrics.Accuracy:P2} | Precision={metrics.Precision:P2} | Recall={metrics.Recall:P2}";
+            return outputs;
         }
     }
 }

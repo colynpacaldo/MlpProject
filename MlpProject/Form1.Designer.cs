@@ -19,6 +19,8 @@
         private System.Windows.Forms.TextBox txtDatasetPath;
         private System.Windows.Forms.TextBox txtOutput;
         private System.Windows.Forms.Label lblDataset;
+        private System.Windows.Forms.Button btnOpenResults;
+        private LossChartPanel lossChart;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -55,6 +57,8 @@
             this.btnTune = new System.Windows.Forms.Button();
             this.progressBar = new System.Windows.Forms.ProgressBar();
             this.txtOutput = new System.Windows.Forms.TextBox();
+            this.btnOpenResults = new System.Windows.Forms.Button();
+            this.lossChart = new LossChartPanel();
             ((System.ComponentModel.ISupportInitialize)(this.nudLearningRate)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudHiddenNodes)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudEpochs)).BeginInit();
@@ -128,7 +132,18 @@
             // progressBar
             // 
             this.progressBar.Location = new System.Drawing.Point(22, 132);
-            this.progressBar.Size = new System.Drawing.Size(720, 12);
+            this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.progressBar.Size = new System.Drawing.Size(590, 12);
+            // 
+            // btnOpenResults
+            // 
+            this.btnOpenResults.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnOpenResults.Location = new System.Drawing.Point(625, 126);
+            this.btnOpenResults.Size = new System.Drawing.Size(117, 24);
+            this.btnOpenResults.Text = "Results folder";
+            this.btnOpenResults.UseVisualStyleBackColor = true;
+            this.btnOpenResults.Click += new System.EventHandler(this.btnOpenResults_Click);
             // 
             // txtOutput
             // 
@@ -138,13 +153,26 @@
             this.txtOutput.Multiline = true;
             this.txtOutput.ReadOnly = true;
             this.txtOutput.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtOutput.Size = new System.Drawing.Size(720, 250);
+            this.txtOutput.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtOutput.Size = new System.Drawing.Size(720, 200);
+            // 
+            // lossChart
+            // 
+            this.lossChart.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lossChart.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lossChart.Location = new System.Drawing.Point(22, 372);
+            this.lossChart.Size = new System.Drawing.Size(720, 270);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(770, 435);
+            this.ClientSize = new System.Drawing.Size(770, 660);
+            this.Controls.Add(this.lossChart);
+            this.Controls.Add(this.btnOpenResults);
             this.Controls.Add(this.txtOutput);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.btnTune);
@@ -158,7 +186,7 @@
             this.Controls.Add(this.txtDatasetPath);
             this.Controls.Add(this.lblDataset);
             this.Controls.Add(this.lblTitle);
-            this.MinimumSize = new System.Drawing.Size(786, 474);
+            this.MinimumSize = new System.Drawing.Size(786, 699);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "MLP Classification Experiment";
             ((System.ComponentModel.ISupportInitialize)(this.nudLearningRate)).EndInit();

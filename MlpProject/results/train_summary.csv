@@ -1,0 +1,2 @@
+LearningRate,HiddenNodes,Epochs,FinalLoss,TrainAccuracy,TestAccuracy,TestPrecision,TestRecall,TP,FP,FN,TN
+0.01,10,1000,0.045341,0.9846,0.9735,0.9756,0.9524,40,1,2,70
